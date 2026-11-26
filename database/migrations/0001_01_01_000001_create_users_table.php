@@ -10,21 +10,20 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('employee_id')
-                ->nullable()
-                ->unique()
-                ->constrained('employees')
-                ->restrictOnDelete();
-
+            // Account information
+            $table->string('name', 150);
             $table->string('username', 120)->unique();
             $table->string('email', 255)->nullable()->unique();
 
             $table->timestamp('email_verified_at')->nullable();
 
+            // Authentication
             $table->string('password', 255);
 
+            // Account status
             $table->boolean('is_active')->default(true);
 
+            // Password security
             $table->boolean('must_change_password')
                 ->default(false);
 

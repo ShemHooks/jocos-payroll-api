@@ -10,6 +10,8 @@ class Permission extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mariadb';
+
     protected $fillable = [
         'code',
         'description',

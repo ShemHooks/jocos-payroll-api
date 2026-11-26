@@ -16,14 +16,9 @@ class PermissionSeeder extends Seeder
                     'code' => $permission->value,
                 ],
                 [
-                    'description' =>
-                        $permission->description(),
+                    'description' => $permission->description(),
                 ]
             );
         }
-
-        $this->command?->info(
-            'System permissions initialized successfully.'
-        );
     }
 }

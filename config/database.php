@@ -114,6 +114,48 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /*
+|--------------------------------------------------------------------------
+| PGNO HRIS Database Connection
+|--------------------------------------------------------------------------
+|
+| Dedicated read-only connection used by the payroll integration service.
+| HRIS remains the authoritative source of personnel information.
+|
+*/
+
+        'hris' => [
+            'driver' => 'mariadb',
+
+            'host' => env('HRIS_DB_HOST', '127.0.0.1'),
+
+            'port' => env('HRIS_DB_PORT', '3306'),
+
+            'database' => env('HRIS_DB_DATABASE', 'pgno_hris'),
+
+            'username' => env('HRIS_DB_USERNAME'),
+
+            'password' => env('HRIS_DB_PASSWORD'),
+
+            'unix_socket' => '',
+
+            'charset' => 'utf8mb4',
+
+            'collation' => 'utf8mb4_unicode_ci',
+
+            'prefix' => '',
+
+            'prefix_indexes' => true,
+
+            'strict' => true,
+
+            'engine' => null,
+
+            'options' => extension_loaded('pdo_mysql') ? [
+                \PDO::ATTR_TIMEOUT => 5,
+            ] : [],
+        ],
+
     ],
 
     /*
@@ -149,7 +191,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

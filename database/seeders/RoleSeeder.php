@@ -21,9 +21,5 @@ class RoleSeeder extends Seeder
                 ]
             );
         }
-
-        $this->command?->info(
-            'System roles initialized successfully.'
-        );
     }
 }

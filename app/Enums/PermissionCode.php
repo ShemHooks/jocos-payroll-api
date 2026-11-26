@@ -4,139 +4,208 @@ namespace App\Enums;
 
 enum PermissionCode: string
 {
-    // User and access management
+    /*
+    |--------------------------------------------------------------------------
+    | User Management
+    |--------------------------------------------------------------------------
+    */
+
     case USERS_VIEW = 'users.view';
     case USERS_MANAGE = 'users.manage';
 
+    /*
+    |--------------------------------------------------------------------------
+    | Role and Permission Management
+    |--------------------------------------------------------------------------
+    */
+
     case ROLES_VIEW = 'roles.view';
     case ROLES_MANAGE = 'roles.manage';
-
     case PERMISSIONS_VIEW = 'permissions.view';
 
-    // Organizational units
-    case ORGANIZATIONAL_UNITS_VIEW =
-    'organizational_units.view';
+    /*
+    |--------------------------------------------------------------------------
+    | Organizational Access Management
+    |--------------------------------------------------------------------------
+    */
 
-    case ORGANIZATIONAL_UNITS_MANAGE =
-    'organizational_units.manage';
+    case ORGANIZATIONAL_UNITS_VIEW = 'organizational_units.view';
+    case ORGANIZATIONAL_UNITS_MANAGE = 'organizational_units.manage';
 
     case ORGANIZATIONAL_ASSIGNMENTS_MANAGE =
     'organizational_assignments.manage';
 
-    // Departments
+    case DEPARTMENT_MAPPINGS_VIEW =
+    'department_mappings.view';
+
+    case DEPARTMENT_MAPPINGS_MANAGE =
+    'department_mappings.manage';
+
+    /*
+    |--------------------------------------------------------------------------
+    | HRIS Reference Data
+    |--------------------------------------------------------------------------
+    */
+
     case DEPARTMENTS_VIEW = 'departments.view';
-    case DEPARTMENTS_MANAGE = 'departments.manage';
-
-    // Positions
     case POSITIONS_VIEW = 'positions.view';
-    case POSITIONS_MANAGE = 'positions.manage';
+    case HRIS_REFERENCES_VIEW = 'hris.references.view';
 
-    // Employees
+    /*
+    |--------------------------------------------------------------------------
+    | HRIS Employee and Appointment Records
+    |--------------------------------------------------------------------------
+    */
+
+    case HRIS_EMPLOYEES_VIEW = 'hris.employees.view';
+    case HRIS_APPOINTMENTS_VIEW = 'hris.appointments.view';
+
+    /*
+    |--------------------------------------------------------------------------
+    | HRIS Synchronization Workflow
+    |--------------------------------------------------------------------------
+    */
+
+    case HRIS_SYNC_VIEW = 'hris.sync.view';
+    case HRIS_SYNC_REVIEW = 'hris.sync.review';
+    case HRIS_SYNC_APPROVE = 'hris.sync.approve';
+    case HRIS_SYNC_EXECUTE = 'hris.sync.execute';
+    case HRIS_SYNC_RETRY = 'hris.sync.retry';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Local Payroll Employee Registry
+    |--------------------------------------------------------------------------
+    */
+
     case EMPLOYEES_VIEW = 'employees.view';
-    case EMPLOYEES_CREATE = 'employees.create';
-    case EMPLOYEES_UPDATE = 'employees.update';
+    case EMPLOYEES_STATUS_MANAGE = 'employees.status.manage';
 
-    case EMPLOYEE_ACCOUNTS_MANAGE =
-    'employee_accounts.manage';
+    /*
+    |--------------------------------------------------------------------------
+    | Approved Appointment Records
+    |--------------------------------------------------------------------------
+    */
 
-    // Employment contracts
-    case CONTRACTS_VIEW = 'contracts.view';
-    case CONTRACTS_MANAGE = 'contracts.manage';
+    case APPOINTMENT_APPROVALS_VIEW =
+    'appointment_approvals.view';
 
-    // Payroll
+    case APPOINTMENT_APPROVALS_REVOKE =
+    'appointment_approvals.revoke';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payroll Management
+    |--------------------------------------------------------------------------
+    */
+
     case PAYROLL_VIEW = 'payroll.view';
     case PAYROLL_CREATE = 'payroll.create';
     case PAYROLL_UPDATE = 'payroll.update';
     case PAYROLL_SUBMIT = 'payroll.submit';
     case PAYROLL_REVIEW = 'payroll.review';
 
-    // Treasury
-    case TREASURY_EXPORT = 'treasury.export';
+    /*
+    |--------------------------------------------------------------------------
+    | Treasury
+    |--------------------------------------------------------------------------
+    */
 
-    // Employee self-service
-    case PAYROLL_SELF_VIEW = 'payroll.self.view';
-    case PAYSLIP_SELF_DOWNLOAD = 'payslip.self.download';
+    case TREASURY_EXPORT = 'treasury.export';
 
     public function description(): string
     {
         return match ($this) {
+
             self::USERS_VIEW =>
                 'View system user accounts.',
 
             self::USERS_MANAGE =>
-                'Create and manage system user accounts.',
+                'Create and manage authorized system user accounts.',
 
             self::ROLES_VIEW =>
                 'View system roles.',
 
             self::ROLES_MANAGE =>
-                'Manage authorized role configurations.',
+                'Manage authorized role assignments and configuration.',
 
             self::PERMISSIONS_VIEW =>
-                'View system permissions.',
+                'View available system permissions.',
 
             self::ORGANIZATIONAL_UNITS_VIEW =>
                 'View organizational units.',
 
             self::ORGANIZATIONAL_UNITS_MANAGE =>
-                'Manage organizational units.',
+                'Manage local organizational units.',
 
             self::ORGANIZATIONAL_ASSIGNMENTS_MANAGE =>
-                'Manage user organizational assignments.',
+                'Manage user assignments to organizational units.',
+
+            self::DEPARTMENT_MAPPINGS_VIEW =>
+                'View HRIS department access mappings.',
+
+            self::DEPARTMENT_MAPPINGS_MANAGE =>
+                'Manage mappings between HRIS departments and local organizational units.',
 
             self::DEPARTMENTS_VIEW =>
-                'View department records.',
-
-            self::DEPARTMENTS_MANAGE =>
-                'Create and update department records.',
+                'View official HRIS departments.',
 
             self::POSITIONS_VIEW =>
-                'View position records.',
+                'View official HRIS positions.',
 
-            self::POSITIONS_MANAGE =>
-                'Create and update position records.',
+            self::HRIS_REFERENCES_VIEW =>
+                'View authorized HRIS reference data.',
+
+            self::HRIS_EMPLOYEES_VIEW =>
+                'View official employee records from HRIS.',
+
+            self::HRIS_APPOINTMENTS_VIEW =>
+                'View official appointment records from HRIS.',
+
+            self::HRIS_SYNC_VIEW =>
+                'View HRIS synchronization requests.',
+
+            self::HRIS_SYNC_REVIEW =>
+                'Review and return pending HRIS synchronization requests.',
+
+            self::HRIS_SYNC_APPROVE =>
+                'Approve reviewed HRIS synchronization requests.',
+
+            self::HRIS_SYNC_EXECUTE =>
+                'Synchronize approved HRIS records into the local payroll database.',
+
+            self::HRIS_SYNC_RETRY =>
+                'Retry failed approved synchronization requests.',
 
             self::EMPLOYEES_VIEW =>
-                'View authorized employee records.',
+                'View authorized employees registered in payroll.',
 
-            self::EMPLOYEES_CREATE =>
-                'Register employee records.',
+            self::EMPLOYEES_STATUS_MANAGE =>
+                'Manage local payroll employee eligibility status.',
 
-            self::EMPLOYEES_UPDATE =>
-                'Update employee records.',
+            self::APPOINTMENT_APPROVALS_VIEW =>
+                'View approved appointment snapshots and version history.',
 
-            self::EMPLOYEE_ACCOUNTS_MANAGE =>
-                'Provision and manage employee accounts.',
-
-            self::CONTRACTS_VIEW =>
-                'View authorized employment contracts.',
-
-            self::CONTRACTS_MANAGE =>
-                'Create and manage employment contracts.',
+            self::APPOINTMENT_APPROVALS_REVOKE =>
+                'Revoke approved appointment records subject to authorization rules.',
 
             self::PAYROLL_VIEW =>
                 'View authorized payroll records.',
 
             self::PAYROLL_CREATE =>
-                'Create payroll records.',
+                'Create payroll records within authorized organizational scope.',
 
             self::PAYROLL_UPDATE =>
-                'Update editable payroll records.',
+                'Update editable payroll records within authorized organizational scope.',
 
             self::PAYROLL_SUBMIT =>
-                'Submit payroll records for review.',
+                'Submit prepared payroll records for review.',
 
             self::PAYROLL_REVIEW =>
-                'Perform authorized accounting payroll review.',
+                'Review submitted payroll records.',
 
             self::TREASURY_EXPORT =>
-                'Export authorized payroll records for treasury.',
-
-            self::PAYROLL_SELF_VIEW =>
-                'View personal released payroll records.',
-
-            self::PAYSLIP_SELF_DOWNLOAD =>
-                'Download personal released payslips.',
+                'Generate authorized treasury payroll exports.',
         };
     }
 }

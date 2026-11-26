@@ -4,22 +4,20 @@ namespace App\Enums;
 
 enum RoleCode: string
 {
-    case ADMIN = 'ADMIN';
-    case ACCOUNTING = 'ACCOUNTING';
-    case TREASURER = 'TREASURER';
-    case PAYROLL_ENCODER = 'PAYROLL_ENCODER';
-    case HOSPITAL_ENCODER = 'HOSPITAL_ENCODER';
-    case EMPLOYEE = 'EMPLOYEE';
+    case ADMIN = 'admin';
+    case ACCOUNTING = 'accounting';
+    case TREASURER = 'treasurer';
+    case PAYROLL_ENCODER = 'payroll_encoder';
+    case HOSPITAL_ENCODER = 'hospital_encoder';
 
     public function label(): string
     {
         return match ($this) {
-            self::ADMIN => 'System Administrator',
-            self::ACCOUNTING => 'Accounting Officer',
+            self::ADMIN => 'Administrator',
+            self::ACCOUNTING => 'Accounting',
             self::TREASURER => 'Treasurer',
             self::PAYROLL_ENCODER => 'Payroll Encoder',
             self::HOSPITAL_ENCODER => 'Hospital Encoder',
-            self::EMPLOYEE => 'Employee',
         };
     }
 
@@ -27,22 +25,19 @@ enum RoleCode: string
     {
         return match ($this) {
             self::ADMIN =>
-                'Manages system configuration, accounts, access, and master data.',
+                'Manages system configuration, user accounts, roles, permissions, and organizational access.',
 
             self::ACCOUNTING =>
-                'Reviews payroll records and accounting transactions.',
+                'Reviews HRIS employee and appointment records, approves synchronization, and reviews payroll.',
 
             self::TREASURER =>
-                'Handles authorized treasury operations and payroll exports.',
+                'Accesses authorized payroll records and generates treasury exports.',
 
             self::PAYROLL_ENCODER =>
                 'Prepares payroll for assigned provincial offices.',
 
             self::HOSPITAL_ENCODER =>
-                'Prepares payroll for an assigned hospital.',
-
-            self::EMPLOYEE =>
-                'Accesses personal released payroll records and payslips.',
+                'Prepares payroll for assigned hospitals.',
         };
     }
 
@@ -52,10 +47,5 @@ enum RoleCode: string
             self::PAYROLL_ENCODER,
             self::HOSPITAL_ENCODER,
         ], true);
-    }
-
-    public function requiresEmployee(): bool
-    {
-        return $this === self::EMPLOYEE;
     }
 }

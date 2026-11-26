@@ -10,22 +10,52 @@ return new class extends Migration {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
 
+            // HRIS reference
+            $table->unsignedBigInteger('hris_employee_id')
+                ->unique();
+
+            // Employee information
             $table->string('employee_no', 50)->unique();
+            $table->string('first_name', 100);
+            $table->string('middle_name', 80)->nullable();
+            $table->string('last_name', 80);
+            $table->string('name_extension', 10)->nullable();
 
-            $table->string('first_name', 150);
-            $table->string('middle_name', 150)->nullable();
-            $table->string('last_name', 150);
-            $table->string('name_extension', 30)->nullable();
+            // HRIS employment status reference
+            $table->unsignedInteger('hris_status_id');
 
-            $table->date('birth_date')->nullable();
-            $table->string('sex', 20)->nullable();
+            $table->date('original_hire_date')->nullable();
+            $table->date('separation_date')->nullable();
 
-            $table->string('email', 255)->nullable();
-            $table->string('mobile_number', 30)->nullable();
+            // Payroll-specific status
+            $table->string('payroll_status', 20)
+                ->default('on_hold');
+
+            // HRIS synchronization
+            $table->string('sync_status', 30)
+                ->default('synced');
+
+            $table->char('hris_source_hash', 64);
+
+            $table->timestamp('hris_updated_at')
+                ->nullable();
+
+            $table->dateTime('hris_synced_at');
+
+            $table->timestamp('hris_last_checked_at')
+                ->nullable();
 
             $table->timestamps();
 
-            $table->index(['last_name', 'first_name']);
+            // Indexes
+            $table->index(
+                ['last_name', 'first_name'],
+                'idx_employee_name'
+            );
+
+            $table->index('payroll_status');
+            $table->index('sync_status');
+            $table->index('hris_status_id');
         });
     }
 

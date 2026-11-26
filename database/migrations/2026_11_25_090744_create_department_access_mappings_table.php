@@ -7,30 +7,28 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('department_access_mappings', function (Blueprint $table) {
             $table->id();
 
+            // External HRIS department reference
+            $table->unsignedInteger('hris_department_id')
+                ->unique();
+
+            // Local organizational unit
             $table->foreignId('organizational_unit_id')
-                ->nullable()
                 ->constrained('organizational_units')
                 ->restrictOnDelete();
 
-            $table->string('office_code', 30)->unique();
-
-            $table->string('name', 255);
-
-            $table->string('abbreviation', 50)
-                ->nullable();
-
-            $table->boolean('is_active')
-                ->default(true);
+            $table->boolean('is_active')->default(true);
 
             $table->timestamps();
+
+            $table->index('is_active');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('department_access_mappings');
     }
 };

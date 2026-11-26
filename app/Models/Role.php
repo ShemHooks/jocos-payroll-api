@@ -10,6 +10,8 @@ class Role extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mariadb';
+
     protected $fillable = [
         'code',
         'name',

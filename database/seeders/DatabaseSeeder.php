@@ -9,7 +9,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::transaction(function () {
+        DB::connection('mariadb')->transaction(function () {
             $this->call([
                 RoleSeeder::class,
                 PermissionSeeder::class,

@@ -2,134 +2,157 @@
 
 namespace Database\Seeders;
 
-use App\Enums\PermissionCode as P;
-use App\Enums\RoleCode as R;
+use App\Enums\PermissionCode;
+use App\Enums\RoleCode;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        $encoderPermissions = [
-            P::DEPARTMENTS_VIEW,
-            P::POSITIONS_VIEW,
-            P::EMPLOYEES_VIEW,
-            P::CONTRACTS_VIEW,
+        DB::connection('mariadb')->transaction(function () {
+            $permissionIds = Permission::query()
+                ->pluck('id', 'code');
 
-            P::PAYROLL_VIEW,
-            P::PAYROLL_CREATE,
-            P::PAYROLL_UPDATE,
-            P::PAYROLL_SUBMIT,
-        ];
-
-        $rolePermissions = [
-
-                // SYSTEM ADMINISTRATOR
-            R::ADMIN->value => [
-                P::USERS_VIEW,
-                P::USERS_MANAGE,
-
-                P::ROLES_VIEW,
-                P::ROLES_MANAGE,
-                P::PERMISSIONS_VIEW,
-
-                P::ORGANIZATIONAL_UNITS_VIEW,
-                P::ORGANIZATIONAL_UNITS_MANAGE,
-                P::ORGANIZATIONAL_ASSIGNMENTS_MANAGE,
-
-                P::DEPARTMENTS_VIEW,
-                P::DEPARTMENTS_MANAGE,
-
-                P::POSITIONS_VIEW,
-                P::POSITIONS_MANAGE,
-
-                P::EMPLOYEES_VIEW,
-                P::EMPLOYEES_CREATE,
-                P::EMPLOYEES_UPDATE,
-                P::EMPLOYEE_ACCOUNTS_MANAGE,
-
-                P::CONTRACTS_VIEW,
-                P::CONTRACTS_MANAGE,
-
-                P::PAYROLL_VIEW,
-            ],
-
-                // ACCOUNTING OFFICER
-            R::ACCOUNTING->value => [
-                P::DEPARTMENTS_VIEW,
-                P::POSITIONS_VIEW,
-                P::EMPLOYEES_VIEW,
-                P::CONTRACTS_VIEW,
-
-                P::PAYROLL_VIEW,
-                P::PAYROLL_REVIEW,
-            ],
-
-                // TREASURER
-            R::TREASURER->value => [
-                P::DEPARTMENTS_VIEW,
-                P::POSITIONS_VIEW,
-                P::EMPLOYEES_VIEW,
-                P::CONTRACTS_VIEW,
-
-                P::PAYROLL_VIEW,
-                P::TREASURY_EXPORT,
-            ],
-
-                // PAYROLL ENCODER
-            R::PAYROLL_ENCODER->value =>
-                $encoderPermissions,
-
-                // HOSPITAL ENCODER
-            R::HOSPITAL_ENCODER->value =>
-                $encoderPermissions,
-
-                // EMPLOYEE SELF-SERVICE
-            R::EMPLOYEE->value => [
-                P::PAYROLL_SELF_VIEW,
-                P::PAYSLIP_SELF_DOWNLOAD,
-            ],
-        ];
-
-        DB::transaction(function () use ($rolePermissions) {
-            foreach ($rolePermissions as $roleCode => $permissions) {
-                $role = Role::where('code', $roleCode)
+            foreach ($this->assignments() as $roleCode => $permissions) {
+                $role = Role::query()
+                    ->where('code', $roleCode)
                     ->firstOrFail();
 
-                $permissionCodes = array_map(
-                    fn(P $permission) => $permission->value,
-                    $permissions
-                );
+                $ids = [];
 
-                $permissionIds = Permission::whereIn(
-                    'code',
-                    $permissionCodes
-                )->pluck('id');
-
-                if (
-                    $permissionIds->count()
-                    !== count($permissionCodes)
-                ) {
-                    throw new \RuntimeException(
-                        "Missing permissions for role: {$roleCode}"
+                foreach ($permissions as $permission) {
+                    $permissionId = $permissionIds->get(
+                        $permission->value
                     );
+
+                    if ($permissionId === null) {
+                        throw new RuntimeException(
+                            "Missing permission: {$permission->value}"
+                        );
+                    }
+
+                    $ids[] = $permissionId;
                 }
 
                 $role->permissions()->sync(
-                    $permissionIds->all()
-                );
-
-                $this->command?->info(
-                    "{$roleCode}: {$permissionIds->count()} permissions assigned."
+                    array_values(array_unique($ids))
                 );
             }
         });
+    }
 
-        $this->command?->info(
-            'Role permissions initialized successfully.'
-        );
+    private function assignments(): array
+    {
+        $referencePermissions = [
+            PermissionCode::DEPARTMENTS_VIEW,
+            PermissionCode::POSITIONS_VIEW,
+            PermissionCode::HRIS_REFERENCES_VIEW,
+        ];
+
+        $payrollReadPermissions = [
+            PermissionCode::EMPLOYEES_VIEW,
+            PermissionCode::APPOINTMENT_APPROVALS_VIEW,
+            PermissionCode::PAYROLL_VIEW,
+        ];
+
+        $encoderPermissions = [
+            ...$referencePermissions,
+            ...$payrollReadPermissions,
+
+            PermissionCode::PAYROLL_CREATE,
+            PermissionCode::PAYROLL_UPDATE,
+            PermissionCode::PAYROLL_SUBMIT,
+        ];
+
+        return [
+
+                /*
+                |--------------------------------------------------------------------------
+                | Administrator
+                |--------------------------------------------------------------------------
+                */
+
+            RoleCode::ADMIN->value => [
+                PermissionCode::USERS_VIEW,
+                PermissionCode::USERS_MANAGE,
+
+                PermissionCode::ROLES_VIEW,
+                PermissionCode::ROLES_MANAGE,
+                PermissionCode::PERMISSIONS_VIEW,
+
+                PermissionCode::ORGANIZATIONAL_UNITS_VIEW,
+                PermissionCode::ORGANIZATIONAL_UNITS_MANAGE,
+                PermissionCode::ORGANIZATIONAL_ASSIGNMENTS_MANAGE,
+
+                PermissionCode::DEPARTMENT_MAPPINGS_VIEW,
+                PermissionCode::DEPARTMENT_MAPPINGS_MANAGE,
+
+                ...$referencePermissions,
+                ...$payrollReadPermissions,
+            ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Accounting
+                |--------------------------------------------------------------------------
+                */
+
+            RoleCode::ACCOUNTING->value => [
+                ...$referencePermissions,
+                ...$payrollReadPermissions,
+
+                PermissionCode::HRIS_EMPLOYEES_VIEW,
+                PermissionCode::HRIS_APPOINTMENTS_VIEW,
+
+                PermissionCode::HRIS_SYNC_VIEW,
+                PermissionCode::HRIS_SYNC_REVIEW,
+                PermissionCode::HRIS_SYNC_APPROVE,
+                PermissionCode::HRIS_SYNC_EXECUTE,
+                PermissionCode::HRIS_SYNC_RETRY,
+
+                PermissionCode::EMPLOYEES_STATUS_MANAGE,
+                PermissionCode::APPOINTMENT_APPROVALS_REVOKE,
+
+                PermissionCode::PAYROLL_REVIEW,
+            ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Treasurer
+                |--------------------------------------------------------------------------
+                */
+
+            RoleCode::TREASURER->value => [
+                ...$referencePermissions,
+                ...$payrollReadPermissions,
+
+                PermissionCode::TREASURY_EXPORT,
+            ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Provincial Payroll Encoder
+                |--------------------------------------------------------------------------
+                */
+
+            RoleCode::PAYROLL_ENCODER->value => [
+                ...$encoderPermissions,
+            ],
+
+                /*
+                |--------------------------------------------------------------------------
+                | Hospital Payroll Encoder
+                |--------------------------------------------------------------------------
+                */
+
+            RoleCode::HOSPITAL_ENCODER->value => [
+                ...$encoderPermissions,
+            ],
+        ];
     }
 }

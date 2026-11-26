@@ -10,6 +10,8 @@ class UserOrganizationalUnit extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mariadb';
+
     protected $table = 'user_organizational_units';
 
     protected $fillable = [

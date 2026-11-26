@@ -8,7 +8,7 @@ class ApiResponse
 {
     public static function success(
         mixed $data = null,
-        string $message = 'Request successful',
+        string $message = 'Request successful.',
         int $status = 200
     ): JsonResponse {
         return response()->json([
