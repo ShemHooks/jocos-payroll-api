@@ -10,64 +10,64 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     */
     public function register(): void
     {
         //
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
-        // ======================================
-        // LOGIN RATE LIMITING
-        // ======================================
+        $this->configureRateLimiting();
+    }
 
-        RateLimiter::for(
-            'auth-login',
-            function (Request $request) {
-                $input = $request->input('username');
+    /**
+     * Configure authentication rate limiters.
+     */
+    private function configureRateLimiting(): void
+    {
+        // Login protection.
 
-                $username = is_string($input)
-                    ? Str::lower(trim($input))
-                    : '';
+        RateLimiter::for('login', function (Request $request) {
+            $input = $request->input('username');
 
-                $usernameKey = hash(
-                    'sha256',
-                    $username
-                );
+            $username = is_string($input)
+                ? Str::lower(trim($input))
+                : '';
 
-                return [
-                    Limit::perMinute(5)
-                        ->by(
-                            'login-user:'
-                            . $usernameKey
-                            . ':'
-                            . $request->ip()
-                        ),
+            $ip = $request->ip();
 
-                    Limit::perMinute(30)
-                        ->by(
-                            'login-ip:'
-                            . $request->ip()
-                        ),
-                ];
-            }
-        );
+            return [
+                Limit::perMinute(5)->by(
+                    'login:account:' . hash(
+                        'sha256',
+                        $username . '|' . $ip
+                    )
+                ),
 
-        // ======================================
-        // PASSWORD CHANGE RATE LIMITING
-        // ======================================
+                Limit::perMinute(30)->by(
+                    'login:ip:' . $ip
+                ),
+            ];
+        });
+
+        // Password change protection.
 
         RateLimiter::for(
             'auth-change-password',
             function (Request $request) {
-                return Limit::perMinute(5)
-                    ->by(
-                        'password-change:'
-                        . (
-                            $request->user()?->id
-                            ?? $request->ip()
-                        )
-                    );
+                $userId = $request->user()?->getAuthIdentifier();
+
+                return Limit::perMinute(5)->by(
+                    $userId !== null
+                    ? 'password-change:user:' . $userId
+                    : 'password-change:ip:' . $request->ip()
+                );
             }
         );
     }
